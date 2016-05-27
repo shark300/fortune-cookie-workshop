@@ -10,10 +10,13 @@
 		<version>1.0.0-BUILD-SNAPSHOT</version>
 	</parent>
 	<dependencies>
-		<!-- Spring -->
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-context</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
@@ -22,7 +25,7 @@
 		<dependency>
 			<groupId>org.aspectj</groupId>
 			<artifactId>aspectjrt</artifactId>
-		</dependency>	
+		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
@@ -43,33 +46,88 @@
 			<scope>runtime</scope>
 		</dependency>
 
-		<!-- @Inject -->
-		<dependency>
-			<groupId>javax.inject</groupId>
-			<artifactId>javax.inject</artifactId>
-		</dependency>
-				
-		<!-- Servlet -->
-		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>servlet-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>javax.servlet.jsp</groupId>
-			<artifactId>jsp-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>jstl</artifactId>
-		</dependency>
-	
 		<!-- Test -->
 		<dependency>
 			<groupId>org.testng</groupId>
 			<artifactId>testng</artifactId>
 			<scope>test</scope>
-		</dependency>        
+		</dependency>
 	</dependencies>
+	<properties>
+		<integration.test.port>9998</integration.test.port>
+	</properties>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-failsafe-plugin</artifactId>
+				<configuration>
+					<systemPropertyVariables>
+						<jetty.port>${integration.test.port}</jetty.port>
+					</systemPropertyVariables>
+				</configuration>
+				<executions>
+					<execution>
+						<id>integration-test</id>
+						<goals>
+							<goal>integration-test</goal>
+							<goal>verify</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>properties-maven-plugin</artifactId>
+				<version>1.0-alpha-2</version>
+				<executions>
+					<execution>
+						<id>system-properties</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>set-system-properties</goal>
+						</goals>
+						<configuration>
+							<properties>
+								<jetty.port>${integration.test.port}</jetty.port>
+							</properties>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-maven-plugin</artifactId>
+				<version>9.3.9.v20160517</version>
+				<executions>
+					<execution>
+						<id>start-jetty</id>
+						<phase>pre-integration-test</phase>
+						<goals>
+							<goal>start</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>stop-jetty</id>
+						<phase>post-integration-test</phase>
+						<goals>
+							<goal>stop</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<stopKey>foo</stopKey>
+					<stopPort>9999</stopPort>
+					<scanIntervalSeconds>0</scanIntervalSeconds>
+					<useTestClasspath>true</useTestClasspath>
+					<classesDirectory>${project.parent.basedir}/webapp/target/classes/</classesDirectory>
+					<webAppSourceDirectory>${project.parent.basedir}/webapp/src/main/webapp/</webAppSourceDirectory>
+					<webApp>
+						<contextPath>/</contextPath>
+						<descriptor>${project.parent.basedir}/webapp/src/main/webapp/WEB-INF/web.xml</descriptor>
+					</webApp>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 </project>
