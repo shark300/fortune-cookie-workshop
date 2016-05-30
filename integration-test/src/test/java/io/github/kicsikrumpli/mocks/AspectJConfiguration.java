@@ -1,0 +1,10 @@
+package io.github.kicsikrumpli.mocks;
+
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
+
+@Configuration
+@EnableAspectJAutoProxy
+public class AspectJConfiguration {
+
+}
